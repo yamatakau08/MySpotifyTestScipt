@@ -115,7 +115,7 @@ else:
 
 if not title == 'Playing from Playlist':
     # touch btn_connect in MAIN SCREEN
-    print 'Touch btn_connect to open "Playing from .*"'
+    print 'Touch "btn_connect" to open "Playing from .*"'
     Home(vc,SCMD_CONNECT)
     # screen will be 'Playing from .*'
     ret,title = Playing(vc,SCMD_TITLE)
@@ -126,18 +126,26 @@ if not title == 'Playing from Playlist':
 
 while True:
     # touch btn_connect
-    print 'touch btn_connect to open "%s"' %TXT_CTAD
+    print 'Touch "btn_connect" to open "%s"' %TXT_CTAD
     Playing(vc,SCMD_CONNECT)
 
-    DeviceList(vc,SCMD_OPEN_CONNECTION_TYPE,TGT_DEVICE_DISPLAY_NAME)
-    ret,cinfo = DeviceList(vc,SCMD_GET_CONNECTION_INFO_ALL,TGT_DEVICE_DISPLAY_NAME) # cinfo: connection info
+    tddn = TGT_DEVICE_DISPLAY_NAME 
+
+    ret = DeviceList(vc,SCMD_OPEN_CONNECTION_TYPE,tddn)
+    if ret:
+        print '"%s" found in "%s" list' %(tddn,TXT_CTAD)
+    else:
+        print '[ERROR] "%s" not found in "%s"' %(tddn,TXT_CTAD)
+        sys.exit()
+
+    ret,cinfo = DeviceList(vc,SCMD_GET_CONNECTION_INFO_ALL,tddn) # cinfo: connection info
     if ret:
         print 'connection type(list): %s' %cinfo
     else:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
 
-    ret,cinfo = DeviceList(vc,SCMD_GET_CONNECTION_INFO_NOW,TGT_DEVICE_DISPLAY_NAME) # cinfo: connection info
+    ret,cinfo = DeviceList(vc,SCMD_GET_CONNECTION_INFO_NOW,tddn) # cinfo: connection info
     if ret:
         print 'connection type(current): %s' %cinfo
     else:
