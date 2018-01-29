@@ -24,7 +24,7 @@ def select_device(vc,tddn): # tddn: tgt_device_display_name:
         view.touch()
         return True
     else:
-        print '"%s" not found in "%s" list' %(vtext,TXT_CTAD)
+        print '[ERROR] "%s" not found in "%s" list' %(vtext,TXT_CTAD)
         return False
 
 #
@@ -67,16 +67,16 @@ def open_connection_type(vc,tddn): # tddn: tgt_device_display_name
     vtext = tddn # vtext: view text
     view  = vc.findViewWithText(vtext)
     if view is None:
-        print '[ERROR] Can\'t get view information TextView %s' %vtext
-        sys.exit()
+        print '[ERROR] "%s" Can\'t get view information TextView' %vtext
+        return False
     else:
         idstr = view.getUniqueId()
 
     ret,vidtddnno = pick_idno(idstr) # vidtddnno: view id tddn no
 
     if ret == False:
-        print 'Can\'t idno %s' %idstr
-        sys.exit()
+        print '[ERROR] Can\'t idno %s for %s' %(idstr,vtext)
+        return False
     else:
         # ctidno : connect type(ImageButton "...") id no
         # + 1 or 2    : ImageButton id no = tddn view id no + 2
@@ -237,7 +237,7 @@ def DeviceList(vc,scmd,arg): # scmd: screen command
 
         return False  # not found device
     elif scmd == SCMD_OPEN_CONNECTION_TYPE:
-        open_connection_type(vc,arg)
+        return open_connection_type(vc,arg)
     elif scmd == SCMD_GET_CONNECTION_INFO_ALL:
         ret,cinfo = Connection(vc,scmd,arg) # cinfo: connection_info
         return ret,cinfo
