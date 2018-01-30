@@ -127,66 +127,23 @@ if not ret:
 
 tddn = TGT_DEVICE_DISPLAY_NAME # tddn: target device display name
 
-while True:
-    print 'Touch "playPause" to play music,may stop in case playing.'
-    Home(vc,SCMD_PLAYPAUSE)
-    vcsleep(7)
+'''
+print 'Touch "playPause" to play music,may stop in case playing.'
+Home(vc,SCMD_PLAYPAUSE)
+vcsleep(7)
+'''
 
-    print 'Open "Your Library"'
-    Home(vc,SCMD_YOUR_LIBRARY_TAB)
+print 'Open Playlist screen'
+Home(vc,SCMD_CONNECT)
 
-    print 'Open "Settings"'
-    Home(vc,SCMD_SETTINGS)
+print 'Touch "btn_play"'
+Playing(vc,SCMD_PLAY)
+vcsleep(7)
 
-    print 'Find "%s" in "Settings" list' %TXT_CTAD
-    Settings(vc,SCMD_SELECT_SETTING,TXT_CTAD)
+print 'Touch "btn_play"'
+Playing(vc,SCMD_PLAY)
+vcsleep(7)
 
-    print 'Open connection type dialog of target device'
-    ret = Connecttoadevice(vc,SCMD_OPEN_CONNECTION_TYPE,tddn)
-    if not ret:
-        print '[ERROR] Can\'t open connection type dialog!'
-        sys.exit()
+print 'Open "Connect to a device" screen'
+Playing(vc,SCMD_CONNECT)
 
-    ret,cinfo = Connecttype(vc,SCMD_GET_CONNECTION_INFO_ALL,tddn) # cinfo: connection info
-    if ret:
-        print 'Connection type(list)   : %s' %cinfo
-    else:
-        print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
-        sys.exit()
-
-    ret,cinfo = Connecttype(vc,SCMD_GET_CONNECTION_INFO_NOW,tddn) # cinfo: connection info
-    if ret:
-        print 'Connection type(current): %s' %cinfo
-    else:
-        print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
-        sys.exit()
-
-    nc = None        
-    if cinfo == 'Spotify Connect':
-        nc = 'Google Cast'
-    elif cinfo == 'Google Cast':
-        nc = 'Spotify Connect'
-    else:
-        print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
-        sys.exit()
-
-    print 'Connection type(to)     : %s' %nc
-
-    ret,cinfo = Connecttype(vc,SCMD_CHANGE_CONNECTION_TYPE,arg=nc)
-    if ret:
-        print 'Connection type(changed): %s' %cinfo
-    else:
-        print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
-        sys.exit()
-    vcsleep(3)
-
-    Connecttoadevice(vc,SCMD_SELECT_DEVICE,tddn)
-    vcsleep(7)
-
-    print 'Touch "home_tab" to back "Home"'
-    Settings(vc,SCMD_HOME_TAB)
-    vcsleep(1)
-
-    print 'Touch "playPause" to play music'
-    Home(vc,SCMD_PLAYPAUSE)
-    vcsleep(10)
