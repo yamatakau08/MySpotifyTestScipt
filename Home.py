@@ -11,13 +11,13 @@ def connect(vc):
         view.touch()
         return True
     else:
-        print '%vn is not found!' %vn
+        print '[ERROR] %vn is not found!' %vn
         return False
 
 #
-# touch btn_connect
+# touch ImageButton playPause
 #
-def playpause(vc):
+def playPause(vc):
     # 'android.widget.ImageButton com.spotify.music:id/playPause'
     vn   = 'playPause' # vn: view name
     vid  = package + ":id/" + vn
@@ -28,7 +28,7 @@ def playpause(vc):
         view.touch()
         return True
     else:
-        print "%s is not found!" %vn
+        print "[ERROR] %s is not found!" %vn
         return False
 
 #
@@ -50,6 +50,53 @@ def getTitle(vc):
         return False,None
 
 #
+# Title
+#
+def your_library_tab(vc):
+    vn   = 'your_library_tab' # vn: view name
+    vid  = package + ":id/" + vn
+    view = vc.findViewById(vid)
+
+    if view:
+        view.touch()
+        return True
+    else:
+        print '[ERROR] %vn is not found!' %vn
+        return False
+
+#
+#
+#
+def settings(vc):
+
+    vmap = vc.getViewsById()
+    vid = 'id/no_id/4' # vid: view id
+    view = vmap[vid]
+
+    if view:
+        view.touch()
+        return True
+    else:
+        print '[ERROR] %s is not found!' %vn
+        return False
+
+#
+#
+#
+def home_tab(vc):
+
+    vn  = 'home_tab' # vid: view id
+    vid = package + ":id/" + vn
+    view = vc.findViewById(vid)
+
+    if view:
+        view.touch()
+        return True
+    else:
+        print '[ERROR] %s is not found!' %vn
+        return False
+
+#
 # main screen dispatch
 #
 def Home(vc,scmd): # scmd: screen command
@@ -62,7 +109,13 @@ def Home(vc,scmd): # scmd: screen command
     elif scmd == SCMD_CONNECT:
         return connect(vc)
     elif scmd == SCMD_PLAYPAUSE:
-        return playpause(vc)
+        return playPause(vc)
+    elif scmd == SCMD_YOUR_LIBRARY_TAB:
+        return your_library_tab(vc)
+    elif scmd == SCMD_SETTINGS:
+        return settings(vc)
+    elif scmd == SCMD_HOME_TAB:
+        return home_tab(vc)
     else:
         pass
 
