@@ -127,13 +127,7 @@ if not ret:
 
 tddn = TGT_DEVICE_DISPLAY_NAME # tddn: target device display name
 
-'''
-print 'Touch "playPause" to play music,may stop in case playing.'
-Home(vc,SCMD_PLAYPAUSE)
-vcsleep(7)
-'''
-
-print 'Open Playlist screen'
+print 'Open Playing screen'
 Home(vc,SCMD_CONNECT)
 
 print 'Touch "btn_play"'
