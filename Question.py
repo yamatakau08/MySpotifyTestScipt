@@ -100,7 +100,10 @@ if device.isLocked():
 print 'Start component:"%s"' %component
 device.startActivity(component=component)
 
-vc       = ViewClient(device, serialno) # vc: ViewClient
+# for useuiautomatorhelper=True to work CulebraTester
+# (https://play.google.com/apps/testing/com.dtmilano.android.culebratester)
+# must be installed on the device under test
+vc       = ViewClient(device, serialno, useuiautomatorhelper=True) # vc: ViewClient
 uidevice = UiDevice(vc)
 
 # it will fail to set English(United States) "en-rUS" when Language setting is other than "Japanese"
@@ -140,4 +143,8 @@ vcsleep(7)
 
 print 'Open "Connect to a device" screen'
 Playing(vc,SCMD_CONNECT)
+
+# quit uiautomatorhelper (a.k.a CulebraTester)
+print 'Closing'
+vc.uiAutomatorHelper.quit()
 
