@@ -55,11 +55,15 @@ def getTitle(vc):
 #
 def Playing(vc,scmd): # scmd: screen command
 
+    '''
     try:
         vc.dump()
     except RuntimeError as e:
         print '[ERROR] %s' %e
         sys.exit()
+    '''
+
+    vc.dump()
 
     if scmd == SCMD_TITLE:
         ret,title = getTitle(vc)
