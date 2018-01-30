@@ -1,15 +1,27 @@
 #
 # find the device in id/device_list
 #
-def find_device(vc,tddn): # tddn: tgt_device_display_name:
+def find_device(vc,arg,touch=None): # arg tgt_device_display_name:
 
-    vtext = tddn # vtext: view text
-    view  = vc.findViewWithText(vtext)
+    ATTEMPTS = 4
 
-    if view:
-        return True
-    else:
-        return False
+    # refer AndroidViewClient-13.6.2/src/com/dtmilano/android/viewclient.py line 2045
+    for i in range(ATTEMPTS):
+#       android___id_list = vc.findViewByIdOrRaise("android:id/list")
+        android___id_list = vc.findViewByIdOrRaise("com.spotify.music:id/devices_list")
+        view = vc.findViewWithText(arg)
+        if view:
+            print '"%s" found in "%s"' %(arg,TXT_CTAD)
+            if touch:
+                view.touch()
+            return True
+        else:
+            android___id_list.uiScrollable.flingForward()
+            vc.sleep(1)
+            vc.dump()
+
+    print '[ERROR] "%s" not found in "%s"' %arg,TXT_CTAD
+    return False
 
 #
 #
@@ -28,7 +40,7 @@ def select_device(vc,tddn): # tddn: tgt_device_display_name:
         return False
 
 #
-#
+# first implementation 
 #
 def drag(vc):
     vid = 'com.spotify.music:id/devices_list' # vid: view id
@@ -67,7 +79,7 @@ def open_connection_type(vc,tddn): # tddn: tgt_device_display_name
     vtext = tddn # vtext: view text
     view  = vc.findViewWithText(vtext)
     if view is None:
-        print '[ERROR] "%s" Can\'t get view information TextView' %vtext
+        print '[ERROR] "%s": Can\'t get view information TextView in "%s"' %(vtext,TXT_CTAD)
         return False
     else:
         idstr = view.getUniqueId()
@@ -220,22 +232,14 @@ def change_connection_type(vc,arg):
 #
 #
 #
-def DeviceList(vc,scmd,arg): # scmd: screen command
+def Connecttoadevice(vc,scmd,arg): # scmd: screen command
 
     vc.dump()
 
-    if scmd == SCMD_FIND_DEVICE:
-        find_device(vc,arg)
+    if   scmd == SCMD_FIND_DEVICE:
+        return find_device(vc,arg)
     elif scmd == SCMD_SELECT_DEVICE:
-        for i in range(0,2): # assume target device is in next list
-            ret = select_device(vc,arg)
-            if ret:
-                return ret
-            else:
-                drag(vc) # drag list to get next list hided below
-                vc.dump()
-
-        return False  # not found device
+        return find_device(vc,arg,touch=True)
     elif scmd == SCMD_OPEN_CONNECTION_TYPE:
         return open_connection_type(vc,arg)
     elif scmd == SCMD_GET_CONNECTION_INFO_ALL:
@@ -249,4 +253,3 @@ def DeviceList(vc,scmd,arg): # scmd: screen command
         return ret,cinfo
     else:
         pass
-

@@ -15,15 +15,16 @@ from com.dtmilano.android.viewclient import UiDevice
 from com.dtmilano.android.viewclient import ViewClient
 
 # the device name which support "Spotify Connect"
-TGT_DEVICE_DISPLAY_NAME = 'SRSyama'
+TGT_DEVICE_DISPLAY_NAME = 'HT-Z9F'
 
 execfile('Home.py')
 execfile('Playing.py')
-execfile('DeviceList.py')
+execfile('Connecttoadevice.py')
+execfile('Settings.py')
+execfile('Connecttype.py')
 
 TXT_CTAD = 'Connect to a device'
 
-#
 #
 #
 def pick_idno(idstr):
@@ -46,25 +47,8 @@ def pick_idno(idstr):
 def printViewsById(vc):
     dict_ids = vc.getViewsById() # getViewsById returns dict type
     for k, v in dict_ids.items():
-        print dict_ids[k]
+        print k,dict_ids[k]
     return dict_ids
-
-# https://qiita.com/everycamel/items/470abe67d83db5140f55
-# enum smething for screen command
-(
-# Main/Playing
-    SCMD_TITLE,
-    SCMD_CONNECT,
-    SCMD_PLAY,
-    SCMD_PLAYPAUSE,
-# DEVICE_LIST    
-    SCMD_FIND_DEVICE,
-    SCMD_SELECT_DEVICE,
-    SCMD_OPEN_CONNECTION_TYPE,
-    SCMD_GET_CONNECTION_INFO_ALL,
-    SCMD_GET_CONNECTION_INFO_NOW,
-    SCMD_CHANGE_CONNECTION_TYPE,
-) = range(0,10) # (0,X) X: total number of elements
 
 def vcsleep(sec):
     print 'ViwewClient.sleep(%s)' %sec
@@ -77,6 +61,29 @@ def tsleep(sec):
 def debug():
     import pdb; pdb.set_trace()    
 
+# https://qiita.com/everycamel/items/470abe67d83db5140f55
+# enum for screen command
+(
+# HomeMain/Playing
+    SCMD_TITLE,
+    SCMD_CONNECT,
+    SCMD_PLAY,
+    SCMD_PLAYPAUSE,
+    SCMD_YOUR_LIBRARY_TAB,
+    SCMD_SETTINGS,
+    SCMD_HOME_TAB,
+# Connect to a device
+    SCMD_FIND_DEVICE,
+    SCMD_SELECT_DEVICE,
+    SCMD_OPEN_CONNECTION_TYPE,
+    SCMD_GET_CONNECTION_INFO_ALL,
+    SCMD_GET_CONNECTION_INFO_NOW,
+    SCMD_CHANGE_CONNECTION_TYPE,
+# Settings
+    SCMD_FIND_SETTING,
+    SCMD_SELECT_SETTING
+) = range(0,15) # (0,X) X: total number of elements
+
 #
 # following is main
 #
@@ -86,7 +93,6 @@ component = package + "/" + activity
 
 device, serialno = ViewClient.connectToDeviceOrExit()
 
-
 if device.isLocked():
     print '[ERROR] Screen is Locked!'
     sys.exit()
@@ -94,8 +100,8 @@ if device.isLocked():
 print 'Start component:"%s"' %component
 device.startActivity(component=component)
 
-vc = ViewClient(device, serialno) # vc: ViewClient Music Center
-uidevice =UiDevice(vc)
+vc       = ViewClient(device, serialno) # vc: ViewClient
+uidevice = UiDevice(vc)
 
 # it will fail to set English(United States) "en-rUS" when Language setting is other than "Japanese"
 # 
@@ -104,8 +110,10 @@ uidevice =UiDevice(vc)
 # uidevice.changeLanguage(languageTo="en-rUS") # 
 # uidevice.openQuickSettingsSettings()
 
-# check android.widget.TextView com.spotify.music:id/glue_toolbar_title
-ret,title = Home(vc,SCMD_TITLE)
+# check android.widget.TextView 
+# com.spotify.music:id/glue_toolbar_title : e.g. Home
+# com.spotify.music:id/context_title
+ret,title = getTitle(vc) # call function defined in Home.py
 if ret:
     print 'Now screen title: "%s"' %title
 else:
@@ -113,41 +121,35 @@ else:
     print 'Is screen locked?'
     sys.exit()
 
-if not title == 'Playing from Playlist':
-    # touch btn_connect in MAIN SCREEN
-    print 'Touch "btn_connect" to open "Playing from .*"'
-    Home(vc,SCMD_CONNECT)
-    # screen will be 'Playing from .*'
-    ret,title = Playing(vc,SCMD_TITLE)
-    if ret and 'Playing from' in title:
-        print 'Screen is "%s"' %title
-    else:
-        print 'Screen is not "Playing from .*" tilte:%s"' %title
+tddn = TGT_DEVICE_DISPLAY_NAME # tddn: target device display name
 
 while True:
-    # touch btn_connect
-    print 'Touch "btn_connect" to open "%s"' %TXT_CTAD
-    Playing(vc,SCMD_CONNECT)
+    print 'Touch "playPause" to play music,may stop in case playing.'
+    Home(vc,SCMD_PLAYPAUSE)
+    vcsleep(7)
 
-    tddn = TGT_DEVICE_DISPLAY_NAME 
+    print 'Open "Your Library"'
+    Home(vc,SCMD_YOUR_LIBRARY_TAB)
 
-    ret = DeviceList(vc,SCMD_OPEN_CONNECTION_TYPE,tddn)
+    print 'Open "Settings"'
+    Home(vc,SCMD_SETTINGS)
+
+    print 'Find "%s" in "Settings" list' %TXT_CTAD
+    Settings(vc,SCMD_SELECT_SETTING,TXT_CTAD)
+
+    print 'Open connect type dialog of target device'
+    Connecttoadevice(vc,SCMD_OPEN_CONNECTION_TYPE,tddn)
+
+    ret,cinfo = Connecttype(vc,SCMD_GET_CONNECTION_INFO_ALL,tddn) # cinfo: connection info
     if ret:
-        print '"%s" found in "%s" list' %(tddn,TXT_CTAD)
-    else:
-        print '[ERROR] "%s" not found in "%s"' %(tddn,TXT_CTAD)
-        sys.exit()
-
-    ret,cinfo = DeviceList(vc,SCMD_GET_CONNECTION_INFO_ALL,tddn) # cinfo: connection info
-    if ret:
-        print 'connection type(list): %s' %cinfo
+        print 'Connection type(list)   : %s' %cinfo
     else:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
 
-    ret,cinfo = DeviceList(vc,SCMD_GET_CONNECTION_INFO_NOW,tddn) # cinfo: connection info
+    ret,cinfo = Connecttype(vc,SCMD_GET_CONNECTION_INFO_NOW,tddn) # cinfo: connection info
     if ret:
-        print 'connection type(current): %s' %cinfo
+        print 'Connection type(current): %s' %cinfo
     else:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
@@ -161,23 +163,23 @@ while True:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
 
-    print 'connection type(to): %s' %nc
+    print 'Connection type(to)     : %s' %nc
 
-    ret,cinfo = DeviceList(vc,SCMD_CHANGE_CONNECTION_TYPE,arg=nc)
+    ret,cinfo = Connecttype(vc,SCMD_CHANGE_CONNECTION_TYPE,arg=nc)
     if ret:
-        print 'connection type(changed): %s' %cinfo
+        print 'Connection type(changed): %s' %cinfo
     else:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
+    vcsleep(3)
 
-    DeviceList(vc,SCMD_SELECT_DEVICE,TGT_DEVICE_DISPLAY_NAME)
-    vcsleep(8) # playing stop and go to 'PLAYING FROM .*'
+    Connecttoadevice(vc,SCMD_SELECT_DEVICE,tddn)
+    vcsleep(7)
 
-    '''
-    print 'press BACK to go "Home"'
-    device.press('KEYCODE_BACK')
-    vcsleep(5)
+    print 'Touch "home_tab" to back "Home"'
+    Settings(vc,SCMD_HOME_TAB)
+    vcsleep(1)
 
-    Home(vc,SCMD_PLAYPAUSE) # tap play_btn on 'Home' screen
+    print 'Touch "playPause" to play music'
+    Home(vc,SCMD_PLAYPAUSE)
     vcsleep(10)
-    '''
