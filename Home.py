@@ -1,35 +1,21 @@
 #
 # touch btn_connect
 #
-def connect(vc):
+def connect(vc,vop):
     # btn_connect
     # android.widget.TextView com.spotify.music:id/btn_connect
-    vn   = 'btn_connect' # vn: view name
-    vid  = package + ":id/" + vn
-    view = vc.findViewById(vid)
-    if view:
-        view.touch()
-        return True
-    else:
-        print '[ERROR] %vn is not found!' %vn
-        return False
+    vn       = 'btn_connect' # vn: view name
+    vid_type = VID_TYPE_NAME
+    return view_op(vc,vn,vid_type,vop)
 
 #
 # touch ImageButton playPause
 #
-def playPause(vc):
+def playPause(vc,vop):
     # 'android.widget.ImageButton com.spotify.music:id/playPause'
-    vn   = 'playPause' # vn: view name
-    vid  = package + ":id/" + vn
-
-    view =  vc.findViewById(vid)
-    
-    if view:
-        view.touch()
-        return True
-    else:
-        print "[ERROR] %s is not found!" %vn
-        return False
+    vn       = 'playPause' # vn: view name
+    vid_type = VID_TYPE_NAME
+    return view_op(vc,vn,vid_type,vop)
 
 #
 # Title
@@ -52,54 +38,31 @@ def getTitle(vc):
 #
 # Title
 #
-def your_library_tab(vc):
-    vn   = 'your_library_tab' # vn: view name
-    vid  = package + ":id/" + vn
-    view = vc.findViewById(vid)
-
-    if view:
-        view.touch()
-        return True
-    else:
-        print '[ERROR] %vn is not found!' %vn
-        return False
+def your_library_tab(vc,vop):
+    vn       = 'your_library_tab' # vn: view name
+    vid_type = VID_TYPE_NAME
+    return view_op(vc,vn,vid_type,vop)
 
 #
 #
 #
-def settings(vc):
-
-    vmap = vc.getViewsById()
-    vid = 'id/no_id/4' # vid: view id
-    view = vmap[vid]
-
-    if view:
-        view.touch()
-        return True
-    else:
-        print '[ERROR] %s is not found!' %vn
-        return False
+def settings(vc,vop):
+    idno     = '4'
+    vid_type = VID_TYPE_NO
+    return view_op(vc,idno,vid_type,vop)
 
 #
 #
 #
-def home_tab(vc):
-
-    vn  = 'home_tab' # vid: view id
-    vid = package + ":id/" + vn
-    view = vc.findViewById(vid)
-
-    if view:
-        view.touch()
-        return True
-    else:
-        print '[ERROR] %s is not found!' %vn
-        return False
+def home_tab(vc,vop):
+    vn       = 'home_tab' # vn: view name
+    vid_type = VID_TYPE_NAME
+    return view_op(vc,vn,vid_type,vop)
 
 #
 # main screen dispatch
 #
-def Home(vc,scmd): # scmd: screen command
+def Home(vc,scmd,vop=None): # scmd: screen command
 
     vc.dump()
 
@@ -107,15 +70,15 @@ def Home(vc,scmd): # scmd: screen command
         ret,title = getTitle(vc)
         return ret,title
     elif scmd == SCMD_CONNECT:
-        return connect(vc)
+        return connect(vc,vop)
     elif scmd == SCMD_PLAYPAUSE:
-        return playPause(vc)
+        return playPause(vc,vop)
     elif scmd == SCMD_YOUR_LIBRARY_TAB:
-        return your_library_tab(vc)
+        return your_library_tab(vc,vop)
     elif scmd == SCMD_SETTINGS:
-        return settings(vc)
+        return settings(vc,vop)
     elif scmd == SCMD_HOME_TAB:
-        return home_tab(vc)
+        return home_tab(vc,vop)
     else:
         pass
 

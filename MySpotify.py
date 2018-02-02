@@ -17,6 +17,7 @@ from com.dtmilano.android.viewclient import ViewClient
 # the device name which support "Spotify Connect"
 TGT_DEVICE_DISPLAY_NAME = 'HT-Z9F'
 
+execfile('common_lib.py')
 execfile('Home.py')
 execfile('Playing.py')
 execfile('Connecttoadevice.py')
@@ -24,42 +25,6 @@ execfile('Settings.py')
 execfile('Connecttype.py')
 
 TXT_CTAD = 'Connect to a device'
-
-#
-#
-def pick_idno(idstr):
-    # idstr assume the following style
-    # 'id/no_id/16'
-    arr  = idstr.split('/')
-    size = len(arr)
-    if size > 0 :
-        # asuume arr[size-1] the last element is 'no' itself
-        if arr[size-1].isdigit():
-            return True, int(arr[size-1])
-        else:
-            return False
-    else:
-        return False
-
-#
-# 
-#
-def printViewsById(vc):
-    dict_ids = vc.getViewsById() # getViewsById returns dict type
-    for k, v in dict_ids.items():
-        print k,dict_ids[k]
-    return dict_ids
-
-def vcsleep(sec):
-    print 'ViwewClient.sleep(%s)' %sec
-    ViewClient.sleep(sec)
-
-def tsleep(sec):
-    print 'time.sleep(%s)' %sec
-    time.sleep(sec)
-
-def debug():
-    import pdb; pdb.set_trace()    
 
 # https://qiita.com/everycamel/items/470abe67d83db5140f55
 # enum for screen command
@@ -73,16 +38,15 @@ def debug():
     SCMD_SETTINGS,
     SCMD_HOME_TAB,
 # Connect to a device
-    SCMD_FIND_DEVICE,
-    SCMD_SELECT_DEVICE,
+    SCMD_DEVICE,
     SCMD_OPEN_CONNECTION_TYPE,
     SCMD_GET_CONNECTION_INFO_ALL,
     SCMD_GET_CONNECTION_INFO_NOW,
     SCMD_CHANGE_CONNECTION_TYPE,
 # Settings
-    SCMD_FIND_SETTING,
-    SCMD_SELECT_SETTING
-) = range(0,15) # (0,X) X: total number of elements
+    SCMD_SETTING,
+    SCMD_SETTING
+) = range(0,14) # (0,X) X: total number of elements
 
 #
 # following is main
@@ -100,7 +64,8 @@ if device.isLocked():
 print 'Start component:"%s"' %component
 device.startActivity(component=component)
 
-vc       = ViewClient(device, serialno) # vc: ViewClient
+useuiautomatorhelper = False
+vc       = ViewClient(device, serialno,useuiautomatorhelper=useuiautomatorhelper) # vc: ViewClient
 uidevice = UiDevice(vc)
 
 # it will fail to set English(United States) "en-rUS" when Language setting is other than "Japanese"
@@ -113,6 +78,9 @@ uidevice = UiDevice(vc)
 # check android.widget.TextView 
 # com.spotify.music:id/glue_toolbar_title : e.g. Home
 # com.spotify.music:id/context_title
+if useuiautomatorhelper:
+    vcsleep(2) # workarround to avoid "WARNING: xxx not found. Perhaps the device has hardware buttons. "
+
 ret,title = getTitle(vc) # call function defined in Home.py
 if ret:
     print 'Screen title: "%s"' %title
@@ -120,7 +88,7 @@ else:
     print '[INFO] Screen title is not found'
 
 print 'Touch "home_tab" to back "Home"'
-ret = Home(vc,SCMD_HOME_TAB)
+ret = Home(vc,SCMD_HOME_TAB,VOP_TOUCH)
 if not ret:
     print '[ERROR] Can\'t bak to "Home"!'
     sys.exit()
@@ -129,20 +97,24 @@ tddn = TGT_DEVICE_DISPLAY_NAME # tddn: target device display name
 
 while True:
     print 'Touch "playPause" to play music,may stop in case playing.'
-    Home(vc,SCMD_PLAYPAUSE)
+    ret = Home(vc,SCMD_PLAYPAUSE,VOP_TOUCH)
+    if not ret:
+        sys.exit()
+
     vcsleep(7)
 
     print 'Open "Your Library"'
-    Home(vc,SCMD_YOUR_LIBRARY_TAB)
+    Home(vc,SCMD_YOUR_LIBRARY_TAB,VOP_TOUCH)
 
+    vcsleep(5)
     print 'Open "Settings"'
-    Home(vc,SCMD_SETTINGS)
+    Home(vc,SCMD_SETTINGS,VOP_TOUCH)
 
     print 'Find "%s" in "Settings" list' %TXT_CTAD
-    Settings(vc,SCMD_SELECT_SETTING,TXT_CTAD)
+    Settings(vc,SCMD_SETTING,VOP_TOUCH,TXT_CTAD)
 
     print 'Open connection type dialog of target device'
-    ret = Connecttoadevice(vc,SCMD_OPEN_CONNECTION_TYPE,tddn)
+    ret = Connecttoadevice(vc,SCMD_OPEN_CONNECTION_TYPE,VOP_TOUCH,tddn)
     if not ret:
         print '[ERROR] Can\'t open connection type dialog!'
         sys.exit()
@@ -166,6 +138,8 @@ while True:
         nc = 'Google Cast'
     elif cinfo == 'Google Cast':
         nc = 'Spotify Connect'
+    elif cinfo == 'Forget this device':
+        nc = cinfo
     else:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
@@ -180,13 +154,13 @@ while True:
         sys.exit()
     vcsleep(3)
 
-    Connecttoadevice(vc,SCMD_SELECT_DEVICE,tddn)
+    Connecttoadevice(vc,SCMD_DEVICE,VOP_TOUCH,tddn)
     vcsleep(7)
 
     print 'Touch "home_tab" to back "Home"'
-    Settings(vc,SCMD_HOME_TAB)
+    Settings(vc,SCMD_HOME_TAB,VOP_TOUCH)
     vcsleep(1)
 
     print 'Touch "playPause" to play music'
-    Home(vc,SCMD_PLAYPAUSE)
+    Home(vc,SCMD_PLAYPAUSE,VOP_TOUCH)
     vcsleep(10)
