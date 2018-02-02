@@ -100,7 +100,8 @@ if device.isLocked():
 print 'Start component:"%s"' %component
 device.startActivity(component=component)
 
-vc       = ViewClient(device, serialno) # vc: ViewClient
+useuiautomatorhelper = True
+vc       = ViewClient(device, serialno, useuiautomatorhelper=useuiautomatorhelper) # vc: ViewClient
 uidevice = UiDevice(vc)
 
 # it will fail to set English(United States) "en-rUS" when Language setting is other than "Japanese"
@@ -141,3 +142,5 @@ vcsleep(7)
 print 'Open "Connect to a device" screen'
 Playing(vc,SCMD_CONNECT)
 
+if useuiautomatorhelper:
+    vc.uiAutomatorHelper.quit()

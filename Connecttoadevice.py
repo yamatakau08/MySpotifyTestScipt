@@ -1,114 +1,102 @@
 #
 # find the device in id/device_list
 #
-def find_device(vc,arg,touch=None): # arg tgt_device_display_name:
+# tddn: target device display name
+def find_device(vc,vop,tddn):
 
     ATTEMPTS = 4
 
+    vn   = 'devices_list' # vn: view name
+    view = None
+
     # refer AndroidViewClient-13.6.2/src/com/dtmilano/android/viewclient.py line 2045
     for i in range(ATTEMPTS):
-#       android___id_list = vc.findViewByIdOrRaise("android:id/list")
-        android___id_list = vc.findViewByIdOrRaise("com.spotify.music:id/devices_list")
-        view = vc.findViewWithText(arg)
-        if view:
-            print '"%s" found in "%s"' %(arg,TXT_CTAD)
-            if touch:
-                view.touch()
-            return True
+        
+        vid_type = VID_TYPE_NAME
+        android___id_list = view_op(vc,vn,vid_type,VOP_VIEW)
+
+        if android___id_list.scrollable():
+            view = vc.findViewWithText(tddn)
+            if view:
+                break
+            else:
+                android___id_list.uiScrollable.flingForward()
+                vc.sleep(1)
+                vc.dump()
         else:
-            android___id_list.uiScrollable.flingForward()
-            vc.sleep(1)
-            vc.dump()
-
-    print '[ERROR] "%s" not found in "%s"' %arg,TXT_CTAD
-    return False
-
-#
-#
-#
-def select_device(vc,tddn): # tddn: tgt_device_display_name:
-    vtext = tddn # vtext: view text
-    view  = vc.findViewWithText(vtext)
+            view = vc.findViewWithText(tddn)
+            if view:
+                break
 
     if view:
-        print '"%s" found in "%s" list' %(vtext,TXT_CTAD)
-        print '"%s" selected' %vtext
-        view.touch()
-        return True
+        print '[INFO] "%s" found in "%s"' %(tddn,vn)
+        if vop == VOP_TOUCH:
+            view.touch()
+            return True
+        if vop == VOP_EXIST:
+            return True
+        else:
+            print '[ERROR] vop:"%s" is not supported in find_device()!' %(vop)
+            return False
     else:
-        print '[ERROR] "%s" not found in "%s" list' %(vtext,TXT_CTAD)
+        print '[ERROR] "%s" not found in "%s"' %(tddn,vn)
         return False
 
 #
-# first implementation 
-#
-def drag(vc):
-    vid = 'com.spotify.music:id/devices_list' # vid: view id
-    devices_list = vc.findViewById(vid)
-
-    # refer https://stackoverflow.com/questions/17520956/scrolling-list-using-android-view-clientdtmilano/17540116#17540116
-    #    (x,y,w,h) = devices_list.getPositionAndSize()
-    (x,y,w,h) = devices_list.getPositionAndSize()
-    print 'x:%d y:%d w:%d h:%d' %(x,y,w,h) # Xperia Z3 returns x:0 y:75 w:1080 h:1536
-
-    # drag
-    start = (int(x+w/2.0),y+h-y)
-    end   = (int(x+w/2.0),y+y)
-    vc.device.drag(start,end,200)
-    # vc.traverse() # need?
-
-    '''
-    # http://www.howtobuildsoftware.com/index.php/how-do/bnk1/android-python-androidviewclient-implement-infinite-scrolling-in-androidviewclient
-    def doSomething(view):
-        if view.getClass() == 'android.widget.TextView':
-            print view.getText()
-
-    # check if scrollable
-    if devices_list.isScrollable():
-        vc.traverse(root=devices_list, transform=doSomething)
-        print "Scrolling"
-        device.dragDip((185.0, 499.0), (191.0, 175.5), 200, 20, 0) # ambiguos
-    '''
 #
 #
-#
-def open_connection_type(vc,tddn): # tddn: tgt_device_display_name
+def open_connection_type(vc,vop,tddn): # tddn: tgt_device_display_name
 
-    views = vc.getViewsById()
+    # firstly find if the device in the device_list
+    # so, specified VOP_EXIST
+    ret = find_device(vc,VOP_EXIST,tddn) 
 
-    vtext = tddn # vtext: view text
-    view  = vc.findViewWithText(vtext)
-    if view is None:
-        print '[ERROR] "%s": Can\'t get view information TextView in "%s"' %(vtext,TXT_CTAD)
+#    debug()
+
+    if not ret:
+        print '[ERROR] "%s": Can\'t get view information TextView in "%s"' %(tddn,TXT_CTAD)
         return False
     else:
-        idstr = view.getUniqueId()
+        vtext = tddn
+        view  = view_op(vc,vtext,VID_TYPE_TEXT,VOP_VIEW)
 
-    ret,vidtddnno = pick_idno(idstr) # vidtddnno: view id tddn no
+        if view is None:
+            print '[ERROR] "%s": Can\'t get view information TextView in "%s"' %(vtext,TXT_CTAD)
+            return False
+        else:
+            idstr         = view.getUniqueId()
+            ret,vidtddnno = pick_idno(idstr) # vidtddnno: view id tddn no
 
-    if ret == False:
-        print '[ERROR] Can\'t idno %s for %s' %(idstr,vtext)
-        return False
-    else:
-        # ctidno : connect type(ImageButton "...") id no
-        # + 1 or 2    : ImageButton id no = tddn view id no + 2
-        for i in range(1,3):
-            vidibtnno = str(vidtddnno + i) # vidibtnno: view id ImageButton no
-            vidibtnstr = 'id/no_id/' + vidibtnno
-
-            vibtn = vc.findViewById(vidibtnstr) # vibtn: view ImageButton
-            if vibtn is None:
-                print '[ERROR] Can\'t get view information "ImageButton ..." in "device_list" view'
+            if ret == False:
+                print '[ERROR] Can\'t idno %s for %s' %(idstr,vtext)
                 return False
             else:
-                if vibtn.getClass() in 'android.widget.ImageButton':
-                    vibtn.touch()
-                    return True
+                vibtn_found = None
+                # ctidno : connect type(ImageButton "...") id no
+                # assume ImageButton id no = tddn view id no + 1 or 2
+                for i in range(1,2):
+                    vidibtnno  = str(vidtddnno + i) # vidibtnno: view id ImageButton no
+                    vidibtnstr = 'id/no_id/' + vidibtnno
+
+                    vibtn = vc.findViewById(vidibtnstr) # vibtn: view ImageButton
+                    if vibtn.getClass() in 'android.widget.ImageButton':
+                        vibtn_found = True
+                        vibtn.touch()
+                        return True
+                    else:
+                        pass
+
+                if vibtn_found:
+                    print '[INFO] found ImageButton(connection_type) for %s in "device_list"' %tddn
+                else:
+                    print '[ERROR] Can\'t get view information "ImageButton ..." in "device_list"'
+                    return False
 
 #
 # connecting
 #
-def connecting_check(vc,device): # device: string
+# tddn: target device display name
+def connecting_check(vc,tddn):
 
     CONNECT_STATUS_CONNECTING        = 3 # "Connecting..."
     CONNECT_STATUS_CONNECTED         = 4 # Connected displaying model name
@@ -123,12 +111,9 @@ def connecting_check(vc,device): # device: string
         vc.dump()
     
         # android.widget.TextView com.spotify.music:id/btn_connect
-        vn  = 'btn_connect' # vn: view name
-        vid = package + ":id/" + vn
-
-        print vid
-
-        view = vc.findViewById(vid)
+        vn       = 'btn_connect' # vn: view name
+        vid_type = VID_TYPE_NAME
+        view = view_op(vc,vn,vid_type,VOP_VIEW)
 
         if view:
             connect_text = view.getText()
@@ -139,7 +124,7 @@ def connecting_check(vc,device): # device: string
         print '[INFO] connect_text: %s' %connect_text
 
         if cs == CONNECT_STATUS_CONNECTING:
-            if   device              in connect_text:
+            if   tddn              in connect_text:
                 cs = CONNECT_STATUS_CONNECTED
             elif 'Devices Available' in connect_text:
                 cs = CONNECT_STATUS_CANNOT_CONNECTED
@@ -148,10 +133,10 @@ def connecting_check(vc,device): # device: string
             else:
                 pass
         elif cs == CONNECT_STATUS_CONNECTED:
-            print '"%s" is connected' %device
+            print '"%s" is connected' %tddn
             break
         elif cs == CONNECT_STATUS_CANNOT_CONNECTED:
-            print '"%s" is not connected' %device
+            print '"%s" is not connected' %tddn
             break
         else:
             pass
@@ -232,16 +217,14 @@ def change_connection_type(vc,arg):
 #
 #
 #
-def Connecttoadevice(vc,scmd,arg): # scmd: screen command
+def Connecttoadevice(vc,scmd,vop,arg=None): # scmd: screen command
 
     vc.dump()
 
-    if   scmd == SCMD_FIND_DEVICE:
-        return find_device(vc,arg)
-    elif scmd == SCMD_SELECT_DEVICE:
-        return find_device(vc,arg,touch=True)
+    if   scmd == SCMD_DEVICE:
+        return find_device(vc,vop,arg)
     elif scmd == SCMD_OPEN_CONNECTION_TYPE:
-        return open_connection_type(vc,arg)
+        return open_connection_type(vc,vop,arg)
     elif scmd == SCMD_GET_CONNECTION_INFO_ALL:
         ret,cinfo = Connection(vc,scmd,arg) # cinfo: connection_info
         return ret,cinfo

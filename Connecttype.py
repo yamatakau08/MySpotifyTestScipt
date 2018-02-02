@@ -16,12 +16,9 @@ def connecting_check(vc,device): # device: string
         vc.dump()
     
         # android.widget.TextView com.spotify.music:id/btn_connect
-        vn  = 'btn_connect' # vn: view name
-        vid = package + ":id/" + vn
-
-        print vid
-
-        view = vc.findViewById(vid)
+        vn       = 'btn_connect' # vn: view name
+        vid_type = VID_TYPE_NAME
+        view = view_op(vc,vn,vid_type,VOP_VIEW)
 
         if view:
             connect_text = view.getText()
@@ -57,51 +54,59 @@ def Connection(vc,scmd,arg=None): # scmd
     GOOGLE_CAST        = 'Google Cast'
     SPOTIFY_CONNECT    = 'Spotify Connect'
     FORGET_THIS_DEVICE = 'Forget this device'
+                                            #exist #view  #connection status
+    connection_info = {GOOGLE_CAST:        [None,  None, False],
+                       SPOTIFY_CONNECT:    [None,  None, False],
+                       FORGET_THIS_DEVICE: [None,  None, False]}
 
-    connection_status = {GOOGLE_CAST:        None,
-                         SPOTIFY_CONNECT:    None,
-                         FORGET_THIS_DEVICE: None,}
-    connection_view   = {GOOGLE_CAST:        None,
-                         SPOTIFY_CONNECT:    None,
-                         FORGET_THIS_DEVICE: None,}
+    flag_gs = False # flag_gs: _gs: Cast/Connect
 
-    # check if 'Forget this device', firstly
-    # sometimes 'Forget this dvice' is not in list
-    view = vc.findViewWithText(FORGET_THIS_DEVICE)
-    if view:
-        connection_status[FORGET_THIS_DEVICE] = True
-    else:
-        del connection_status[FORGET_THIS_DEVICE]
-        
-    # check if each connection type has ImageView shows the current connectio type 
-    for k,v in connection_status.items():
+    for k,v in connection_info.items():
         view = vc.findViewWithText(k)
 
-        if view is None:
-            connection_status[k] = False
-        else:
-            connection_view[k] = view
+        if not view: # view not exist
+            value = connection_info[k]
+            value[0] = None
+            value[1] = None
+            value[2] = False
+        else: # view exist
+            value = connection_info[k]
 
-            vidnostr  = view.getUniqueId() # vidnostr: view id no string
-            ret,vidno = pick_idno(vidnostr)
-            vidselimg = 'id/no_id/' + str(vidno + 1) # vidselimg: view id selected image +1: assume next id selected is image view?
-            viv = vc.findViewById(vidselimg) # viv: view ImageView
+            # value[0]: exist in list
+            value[0] = True
 
-            if viv and viv.getClass() == 'android.widget.ImageView':
-                connection_status[k] = True
-            else:
-                connection_status[k] = False
+            # value[1]: view
+            value[1] = view
 
+            # value[2]: connection status
+            if k == 'Google Cast' or k == 'Spotify Connect': # need to check if there is ImageView shows connect
+                vidnostr  = view.getUniqueId() # vidnostr: view id no string
+                ret,vidno = pick_idno(vidnostr)
+                vidselimg = 'id/no_id/' + str(vidno + 1) # vidselimg: view id selected image +1: assume next id selected is image view?
+                viv = vc.findViewById(vidselimg) # viv: view ImageView
+
+                if viv and viv.getClass() == 'android.widget.ImageView':
+                    value[2] = True
+                    flag_gs  = True
+                else:
+                    value[2] = False
+                        
+    if not flag_gs:
+        v = connection_info[FORGET_THIS_DEVICE]
+        # connection status
+        v[2] = True
+        
     if scmd == SCMD_GET_CONNECTION_INFO_ALL:
-        return True,connection_status
+        return True,connection_info
     elif scmd == SCMD_GET_CONNECTION_INFO_NOW:
-        for k,v in connection_status.items():
-            if v == True:
+        for k,v in connection_info.items():
+            if v[2] == True:
                 return True,k
         return False,None
     elif scmd == SCMD_CHANGE_CONNECTION_TYPE:
-        if arg in connection_status.keys():
-            connection_view[arg].touch()
+        if arg in connection_info.keys():
+            v = connection_info[arg]
+            v[1].touch()
             return True,arg
         else:
             return False,None
