@@ -3,57 +3,20 @@
 #
 # tddn: target device display name
 def find_device(vc,vop,tddn):
-
-    ATTEMPTS = 4
-
-    vn   = 'devices_list' # vn: view name
-    view = None
-
-    # refer AndroidViewClient-13.6.2/src/com/dtmilano/android/viewclient.py line 2045
-    for i in range(ATTEMPTS):
-        
-        vid_type = VID_TYPE_NAME
-        android___id_list = view_op(vc,vn,vid_type,VOP_VIEW)
-
-        if android___id_list.scrollable():
-            view = vc.findViewWithText(tddn)
-            if view:
-                break
-            else:
-                android___id_list.uiScrollable.flingForward()
-                vc.sleep(1)
-                vc.dump()
-        else:
-            view = vc.findViewWithText(tddn)
-            if view:
-                break
-
-    if view:
-        print '[INFO] "%s" found in "%s"' %(tddn,vn)
-        if vop == VOP_TOUCH:
-            view.touch()
-            return True
-        if vop == VOP_EXIST:
-            return True
-        else:
-            print '[ERROR] vop:"%s" is not supported in find_device()!' %(vop)
-            return False
-    else:
-        print '[ERROR] "%s" not found in "%s"' %(tddn,vn)
-        return False
+    vn       = 'devices_list' # vn: view name
+    vid_type = VID_TYPE_NAME
+    return view_list_op(vc,vn,vid_type,vop,tddn)
 
 #
 #
 #
 def open_connection_type(vc,vop,tddn): # tddn: tgt_device_display_name
 
-    # firstly find if the device in the device_list
-    # so, specified VOP_EXIST
-    ret = find_device(vc,VOP_EXIST,tddn) 
+    # firstly find and return view if the device in the device_list
+    # so, specified VOP_VIEW
+    view = find_device(vc,VOP_VIEW,tddn) 
 
-#    debug()
-
-    if not ret:
+    if not view:
         print '[ERROR] "%s": Can\'t get view information TextView in "%s"' %(tddn,TXT_CTAD)
         return False
     else:
@@ -74,7 +37,7 @@ def open_connection_type(vc,vop,tddn): # tddn: tgt_device_display_name
                 vibtn_found = None
                 # ctidno : connect type(ImageButton "...") id no
                 # assume ImageButton id no = tddn view id no + 1 or 2
-                for i in range(1,2):
+                for i in range(1,3):
                     vidibtnno  = str(vidtddnno + i) # vidibtnno: view id ImageButton no
                     vidibtnstr = 'id/no_id/' + vidibtnno
 
