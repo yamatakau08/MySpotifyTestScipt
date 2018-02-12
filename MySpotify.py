@@ -45,8 +45,7 @@ TXT_CTAD = 'Connect to a device'
     SCMD_CHANGE_CONNECTION_TYPE,
 # Settings
     SCMD_SETTING,
-    SCMD_SETTING
-) = range(0,14) # (0,X) X: total number of elements
+) = range(0,13) # (0,X) X: total number of elements
 
 #
 # following is main
