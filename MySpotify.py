@@ -45,12 +45,7 @@ TXT_CTAD = 'Connect to a device'
     SCMD_CHANGE_CONNECTION_TYPE,
 # Settings
     SCMD_SETTING,
-<<<<<<< HEAD
 ) = range(0,13) # (0,X) X: total number of elements
-=======
-    SCMD_SETTING
-) = range(0,14) # (0,X) X: total number of elements
->>>>>>> 89944d71de5f7491666f97759eaede0fb968d394
 
 #
 # following is main
@@ -115,7 +110,12 @@ while True:
     Home(vc,SCMD_SETTINGS,VOP_TOUCH)
 
     print 'Find "%s" in "Settings" list' %TXT_CTAD
-    Settings(vc,SCMD_SETTING,VOP_TOUCH,TXT_CTAD)
+
+    # Spotify App Version 8.4.39.673 armV7 on Xperia Z3
+    # Since it's a little bit hard to find text "Connect to a device" item,use text 'Listen to and control Spotify on your devices.' instead
+    #txt = TXT_CTAD    
+    txt = 'Listen to and control Spotify on your devices.'
+    Settings(vc,SCMD_SETTING,VOP_TOUCH,txt)
 
     print 'Open connection type dialog of target device'
     ret = Connecttoadevice(vc,SCMD_OPEN_CONNECTION_TYPE,VOP_TOUCH,tddn)
