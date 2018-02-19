@@ -50,9 +50,9 @@ def open_connection_type(vc,vop,tddn): # tddn: tgt_device_display_name
                         pass
 
                 if vibtn_found:
-                    print '[INFO] found ImageButton(connection_type) for %s in "device_list"' %tddn
+                    print '[INFO] found view inforamtion "ImageButton" for connection_type %s in "device_list"' %tddn
                 else:
-                    print '[ERROR] Can\'t get view information "ImageButton ..." in "device_list"'
+                    print '[ERROR] Can\'t find view inforamtion "ImageButton" for connection_type %s in "device_list"' %tddn
                     return False
 
 #
