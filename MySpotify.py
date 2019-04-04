@@ -15,7 +15,8 @@ from com.dtmilano.android.viewclient import UiDevice
 from com.dtmilano.android.viewclient import ViewClient
 
 # the device name which support "Spotify Connect"
-TGT_DEVICE_DISPLAY_NAME = 'HT-Z9F'
+#TGT_DEVICE_DISPLAY_NAME = 'HT-Z9F'
+TGT_DEVICE_DISPLAY_NAME = 'sony'
 
 execfile('common_lib.py')
 execfile('Home.py')
@@ -60,7 +61,7 @@ if device.isLocked():
     print '[ERROR] Screen is Locked!'
     sys.exit()
 
-print 'Start component:"%s"' %component
+print '[INFO] Start component:"%s"' %component
 device.startActivity(component=component)
 
 useuiautomatorhelper = False
@@ -82,11 +83,11 @@ if useuiautomatorhelper:
 
 ret,title = getTitle(vc) # call function defined in Home.py
 if ret:
-    print 'Screen title: "%s"' %title
+    print '[INFO] Screen title: "%s"' %title
 else:
     print '[INFO] Screen title is not found'
 
-print 'Touch "home_tab" to back "Home"'
+print '[INFO] Touch "home_tab" to back "Home"'
 ret = Home(vc,SCMD_HOME_TAB,VOP_TOUCH)
 if not ret:
     print '[ERROR] Can\'t bak to "Home"!'
@@ -95,21 +96,21 @@ if not ret:
 tddn = TGT_DEVICE_DISPLAY_NAME # tddn: target device display name
 
 while True:
-    print 'Touch "playPause" to play music,may stop in case playing.'
+    print '[INFO] Touch "playPause" to play music,may stop in case playing.'
     ret = Home(vc,SCMD_PLAYPAUSE,VOP_TOUCH)
     if not ret:
         sys.exit()
 
     vcsleep(7)
 
-    print 'Open "Your Library"'
+    print '[INFO] Open "Your Library"'
     Home(vc,SCMD_YOUR_LIBRARY_TAB,VOP_TOUCH)
 
     vcsleep(5)
-    print 'Open "Settings"'
+    print '[INFO] Open "Settings"'
     Home(vc,SCMD_SETTINGS,VOP_TOUCH)
 
-    print 'Find "%s" in "Settings" list' %TXT_CTAD
+    print '[INFO] Find "%s" in "Settings" list' %TXT_CTAD
 
     # Spotify App Version 8.4.39.673 armV7 on Xperia Z3
     # Since it's a little bit hard to find text "Connect to a device" item,use text 'Listen to and control Spotify on your devices.' instead
@@ -117,7 +118,7 @@ while True:
     txt = 'Listen to and control Spotify on your devices.'
     Settings(vc,SCMD_SETTING,VOP_TOUCH,txt)
 
-    print 'Open connection type dialog of target device'
+    print '[INFO] Open connection type dialog of target device'
     ret = Connecttoadevice(vc,SCMD_OPEN_CONNECTION_TYPE,VOP_TOUCH,tddn)
     if not ret:
         print '[ERROR] Can\'t open connection type dialog!'
@@ -125,14 +126,14 @@ while True:
 
     ret,cinfo = Connecttype(vc,SCMD_GET_CONNECTION_INFO_ALL,tddn) # cinfo: connection info
     if ret:
-        print 'Connection type(list)   : %s' %cinfo
+        print '[INFO] Connection type(list)   : %s' %cinfo
     else:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
 
     ret,cinfo = Connecttype(vc,SCMD_GET_CONNECTION_INFO_NOW,tddn) # cinfo: connection info
     if ret:
-        print 'Connection type(current): %s' %cinfo
+        print '[INFO] Connection type(current): %s' %cinfo
     else:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
@@ -148,11 +149,11 @@ while True:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
 
-    print 'Connection type(to)     : %s' %nc
+    print '[INFO] Connection type(to)     : %s' %nc
 
     ret,cinfo = Connecttype(vc,SCMD_CHANGE_CONNECTION_TYPE,arg=nc)
     if ret:
-        print 'Connection type(changed): %s' %cinfo
+        print '[INFO] Connection type(changed): %s' %cinfo
     else:
         print '[ERROR] ret:%s,cinfo:%s' %(ret,cinfo)
         sys.exit()
@@ -161,10 +162,10 @@ while True:
     Connecttoadevice(vc,SCMD_DEVICE,VOP_TOUCH,tddn)
     vcsleep(7)
 
-    print 'Touch "home_tab" to back "Home"'
+    print '[INFO] Touch "home_tab" to back "Home"'
     Settings(vc,SCMD_HOME_TAB,VOP_TOUCH)
     vcsleep(1)
 
-    print 'Touch "playPause" to play music'
+    print '[INFO] Touch "playPause" to play music'
     Home(vc,SCMD_PLAYPAUSE,VOP_TOUCH)
     vcsleep(10)

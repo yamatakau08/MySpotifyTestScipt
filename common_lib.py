@@ -8,11 +8,11 @@ def printViewsById(vc):
     return dict_ids
 
 def vcsleep(sec):
-    print 'ViewClient.sleep(%s)' %sec
+    print '[INFO] ViewClient.sleep(%s)' %sec
     ViewClient.sleep(sec)
 
 def tsleep(sec):
-    print 'time.sleep(%s)' %sec
+    print '[INFO] time.sleep(%s)' %sec
     time.sleep(sec)
 
 def debug():
@@ -54,8 +54,9 @@ def pick_idno(idstr):
 #           need to select android/package itself
 def view_op(vc,vid,vid_type,vop,vpackage=None,debug=True):
 
-    xvid = None
-    view = None
+    xvid  = None
+    view  = None
+    fname = sys._getframe().f_code.co_name
 
     # check view type no/name/text
     if   vid_type == VID_TYPE_NO:
@@ -96,7 +97,7 @@ def view_op(vc,vid,vid_type,vop,vpackage=None,debug=True):
             return True
     else:
         if debug:
-            print '[ERROR] view:"%s" is not found!' %(xvid)
+            print '[ERROR] func:"%s" view:"%s" is not found!' %(fname,xvid)
 
         if vop == VOP_VIEW:
             return None

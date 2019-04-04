@@ -69,7 +69,7 @@ def connecting_check(vc,tddn):
     ssec = 3;
 
     while True:
-        print 'sleep %ssec for checking connection sutatus:%s' %(ssec,cs)
+        print '[INFO] sleep %ssec for checking connection sutatus:%s' %(ssec,cs)
         tsleep(ssec)
         vc.dump()
     
@@ -96,10 +96,10 @@ def connecting_check(vc,tddn):
             else:
                 pass
         elif cs == CONNECT_STATUS_CONNECTED:
-            print '"%s" is connected' %tddn
+            print '[INFO] "%s" is connected' %tddn
             break
         elif cs == CONNECT_STATUS_CANNOT_CONNECTED:
-            print '"%s" is not connected' %tddn
+            print '[INFO] "%s" is not connected' %tddn
             break
         else:
             pass

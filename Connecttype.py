@@ -11,7 +11,7 @@ def connecting_check(vc,device): # device: string
     ssec = 3;
 
     while True:
-        print 'sleep %ssec for checking connection sutatus:%s' %(ssec,cs)
+        print '[INFO] sleep %ssec for checking connection sutatus:%s' %(ssec,cs)
         tsleep(ssec)
         vc.dump()
     
@@ -38,10 +38,10 @@ def connecting_check(vc,device): # device: string
             else:
                 pass
         elif cs == CONNECT_STATUS_CONNECTED:
-            print '"%s" is connected' %device
+            print '[INFO] "%s" is connected' %device
             break
         elif cs == CONNECT_STATUS_CANNOT_CONNECTED:
-            print '"%s" is not connected' %device
+            print '[INFO] "%s" is not connected' %device
             break
         else:
             pass
