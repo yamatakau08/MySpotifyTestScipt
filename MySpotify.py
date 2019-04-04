@@ -114,7 +114,7 @@ while True:
 
     # Spotify App Version 8.4.39.673 armV7 on Xperia Z3
     # Since it's a little bit hard to find text "Connect to a device" item,use text 'Listen to and control Spotify on your devices.' instead
-    #txt = TXT_CTAD    
+    # txt = TXT_CTAD
     txt = 'Listen to and control Spotify on your devices.'
     Settings(vc,SCMD_SETTING,VOP_TOUCH,txt)
 
@@ -159,6 +159,7 @@ while True:
         sys.exit()
     vcsleep(3)
 
+    print '[INFO] Connect to the devices'
     Connecttoadevice(vc,SCMD_DEVICE,VOP_TOUCH,tddn)
     vcsleep(7)
 
@@ -168,4 +169,4 @@ while True:
 
     print '[INFO] Touch "playPause" to play music'
     Home(vc,SCMD_PLAYPAUSE,VOP_TOUCH)
-    vcsleep(10)
+    vcsleep(180)
